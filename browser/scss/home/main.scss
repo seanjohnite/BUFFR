@@ -1,0 +1,27 @@
+#home {
+
+  * {
+    display: inline-block;
+  }
+
+
+  buffr-logo img {
+    width: 128px;
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    vertical-align: middle;
+  }
+
+  buffr-logo img:after{
+    content: "";
+    display: block;
+    clear:both;
+  }
+
+  a {
+    display: inline-block;
+  }
+}
+
