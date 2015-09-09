@@ -1,5 +1,9 @@
 navbar {
 
+  .navbar {
+    border-radius: 0;
+  }
+
   display: inline-block;
   .navbar-inverse .nav > li > a {
     border: none;
@@ -28,7 +32,8 @@ navbar {
   .navbar-inverse .navbar-brand {
     padding: 0;
     height: 53px;
-    border:none;
+    border: none;
+    border-radius: 0;
   }
 
   .nav > li > a {

@@ -102,6 +102,58 @@ describe('Buffer Model', function () {
 
     });
 
+    describe('makeCompound', function () {
+
+      it('should take an compound/concentration object, make the compound, and return its objectId', function () {
+        // can run with compounds
+        var compound = {
+          value: {
+            formula: 'NaCl'
+          },
+          concentration: {
+            value: 5,
+            units: 'M'
+          }
+        };
+        return Buffer.makeCompound(compound)
+        .then(function (result) {
+          expect(result._bsontype).to.equal('ObjectID');
+        }).should.be.fulfilled;
+        
+      });
+    });
+
+    describe('makeAllCompounds', function () {
+
+      it('should take an array of compound/concentration objects, make the compound, and return their objectIds', function () {
+        // can run with compounds
+        var compounds = [{
+          value: {
+            formula: 'NaCl'
+          },
+          concentration: {
+            value: 5,
+            units: 'M'
+          }
+        }, {
+          value: {
+            formula: 'CH3'
+          },
+          concentration: {
+            value: 4,
+            units: 'mM'
+          }
+        }];
+        return Buffer.makeAllCompounds(compounds)
+        .then(function (cpdIDArr) {
+          cpdIDArr.forEach(function (cpdID) {
+            expect(cpdID._bsontype).to.equal('ObjectID');
+          });
+        }).should.be.fulfilled;
+        
+      });
+    });
+
   });
 
   describe('Methods', function () {
@@ -127,10 +179,9 @@ describe('Buffer Model', function () {
         });
         
       });
-
-
-
     });
+
+
 
     // describe('storeAmounts', function () {
 

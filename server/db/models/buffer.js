@@ -53,18 +53,6 @@ bufferSchema.virtual('cpdsMolarConc').get(function () {
   });
 });
 
-// bufferSchema.virtual('nameify').get(function () {
-//   if (this.name) return this.name;
-//   var self = this;
-//   return this.compounds.reduce(function (name, cpd) {
-//     cpdVal = cpd.value;
-//     var namePart = cpd.concentration.value.toString() + ' ' + cpd.concentration.units;
-//     namePart += ' ' + cpdVal.formula;
-//     name.push(namePart);
-//     return name;
-//   }, []).join(', ');
-// });
-
 bufferSchema.virtual('milliliters').get(function () {
   var units = this.volume.units;
   var value = this.volume.value;
@@ -87,6 +75,17 @@ bufferSchema.statics.strParse = function (str, possibles) {
   var unit = str.match(/[a-zA-Z]+/)[0];
   if (possibles.indexOf(unit) === -1) throw new Error("Could not parse unit");
   return {value: Number(number), units: unit};
+};
+
+bufferSchema.statics.makeCompound = function (compoundConcObj) {
+  return Compound.findOrCreate(compoundConcObj.value)
+  .then(function (compound) {
+    return compound._id;
+  });
+};
+
+bufferSchema.statics.makeAllCompounds = function (compoundConcObjArr) {
+  return Promise.map(compoundConcObjArr, this.makeCompound);
 };
 
 
@@ -126,18 +125,23 @@ bufferSchema.methods.populateCompounds = function () {
 
 bufferSchema.methods.toString = function () {
   if (this.name) return this.name;
-  var self = this;
   return this.populateCompounds()
   .then(function (buffer) {
     return buffer.compounds.reduce(function (name, cpd) {
-      cpdVal = cpd.value;
+      var cpdVal = cpd.value;
       var namePart = cpd.concentration.value.toString() + ' ' + cpd.concentration.units;
       namePart += ' ' + cpdVal.formula;
       name.push(namePart);
       return name;
     }, []).join(', ');
-  })
+  });
 };
+
+// bufferSchema.pre('validate', function (next) {
+//   Promise.map(this.compounds, function (compound) {
+//     console.log("prevalidate hook log", compound);
+//   }).then(next);
+// });
 
 var Buffer = mongoose.model('Buffer', bufferSchema);
 

@@ -1,6 +1,7 @@
 'use strict';
 var crypto = require('crypto');
 var mongoose = require('mongoose');
+// var Buffer = mongoose.model('Buffer');
 
 var schema = new mongoose.Schema({
     email: {
@@ -57,4 +58,33 @@ schema.method('correctPassword', function (candidatePassword) {
     return encryptPassword(candidatePassword, this.salt) === this.password;
 });
 
+schema.methods.getBuffers = function () {
+    return Buffer.find({userId: this._id});
+};
+
 mongoose.model('User', schema);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

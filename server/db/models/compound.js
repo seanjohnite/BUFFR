@@ -39,6 +39,16 @@ compoundSchema.plugin(deepPopulate);
 // and then when validated, it would fill in MW, elements array, etc...
 // you can see the utility functions I'm thinking about for this with tests
 // in utilities.js
+
+compoundSchema.statics.findOrCreate = function(cpd) {
+  var self = this;
+  return this.findOne(cpd)
+  .then(function (compound) {
+    if (!compound) return self.create(cpd);
+    else return compound;
+  });
+};
+
 compoundSchema.methods.getMW = function() {
   var self = this;
   return new Promise(function (resolve, reject) {
@@ -53,6 +63,58 @@ compoundSchema.methods.getMW = function() {
     }, 0);
   });
 };
+
+function simplify(formula) {
+    var regEx = /(\(([A-Z][a-z]?\d*)+\)\d*|\[([A-Z][a-z]?\d*)+\]\d*|\{([A-Z][a-z]?\d*)+\}\d*)/g;
+    var f = formula.match(regEx);
+
+    function firstPart(element) {
+      var number = element.match(/\d+$/g);
+      if(number) number = parseInt(number);
+      else number = 1;
+      var innerMatch = element.match(/[A-Z][a-z]?\d*/g);
+      var str = '';
+      innerMatch.forEach(function(subStr) {
+        var subNumber = subStr.match(/\d+$/g);
+        if(subNumber) subStr = subStr.replace(subNumber, parseInt(subNumber) * number);
+        else {
+            if(number !== 1) subStr += number;
+        }
+        str += subStr;
+      });
+      formula = formula.replace(element, str);
+    }
+    while(f) {
+      f.forEach(firstPart);
+      f = formula.match(regEx);
+    }
+    return formula;
+}
+
+function objectComposer(formula) {
+    var elementsObj = {}, newMatches = formula.match(/[A-Z][a-z]?\d*/g),
+    el;
+    newMatches.forEach(function(element) {
+        el = element.match(/[A-Z][a-z]?/g);
+        var number = parseInt((element.match(/\d+/g) || '1')[0]);
+        if(elementsObj[el]) elementsObj[el] += number;
+        else elementsObj[el] = number;
+    });
+    return elementsObj;
+}
+
+function formulaParser(formula) {
+  formula = simplify(formula);
+  return objectComposer(formula);
+}
+
+function compoundMatcher(str) {
+  var formula = formulaParser(str);
+  return Object.keys(formula).map(function(element) {
+    if(formula[element] === 1) return element;
+    return element + formula[element];
+  });
+}
 
 compoundSchema.methods.getElements = function () {
   var self = this;
@@ -82,7 +144,7 @@ compoundSchema.pre('validate', function (next) {
   if (!this.formula) return next();
   if (this.formula && this.elements && this.mW) return next(); // to check if these are already done
   var self = this;
-  this.getElements().then(function (stuff) {
+  this.getElements().then(function () {
     return self.getMW();
   })
   .then(function (number) {
@@ -96,52 +158,3 @@ var Compound = mongoose.model('Compound', compoundSchema);
 
 module.exports = Compound;
 
-function simplify(formula) {
-    var regEx = /(\(([A-Z][a-z]?\d*)+\)\d*|\[([A-Z][a-z]?\d*)+\]\d*|\{([A-Z][a-z]?\d*)+\}\d*)/g;
-    var f = formula.match(regEx);
-         while(f) {
-             f.forEach(function(element) {
-             var number = element.match(/\d+$/g);
-             if(number) number = parseInt(number);
-             else number = 1;
-             var innerMatch = element.match(/[A-Z][a-z]?\d*/g);
-             var str = '';
-             innerMatch.forEach(function(subStr) {
-                var subNumber = subStr.match(/\d+$/g);
-                if(subNumber) subStr = subStr.replace(subNumber, parseInt(subNumber) * number);
-                else {
-                    if(number !== 1) subStr += number;
-                }
-                str += subStr;
-            });
-            formula = formula.replace(element, str);
-        });
-        f = formula.match(regEx);
-     }
-    return formula;
-}
-
-function objectComposer(formula) {
-    var elementsObj = {}, newMatches = formula.match(/[A-Z][a-z]?\d*/g),
-    el;
-    newMatches.forEach(function(element) {
-        el = element.match(/[A-Z][a-z]?/g);
-        var number = parseInt((element.match(/\d+/g) || '1')[0]);
-        if(elementsObj[el]) elementsObj[el] += number;
-        else elementsObj[el] = number;
-    });
-    return elementsObj;
-}
-
-function formulaParser(formula) {
-  formula = simplify(formula);
-  return objectComposer(formula);
-}
-
-function compoundMatcher(str) {
-  var formula = formulaParser(str);
-  return Object.keys(formula).map(function(element) {
-    if(formula[element] === 1) return element;
-    return element + formula[element];
-  });
-}
