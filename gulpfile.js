@@ -18,6 +18,10 @@ var mocha = require('gulp-mocha');
 var karma = require('karma').server;
 var istanbul = require('gulp-istanbul');
 
+// browserify info
+var browserify = require('browserify');
+var source = require('vinyl-source-stream');
+
 // Development tasks
 // --------------------------------------------------------------
 
@@ -36,6 +40,16 @@ gulp.task('lintJS', function () {
         .pipe(eslint())
         .pipe(eslint.format())
         .pipe(eslint.failOnError());
+
+});
+
+// add support for browserify
+gulp.task('browserify', ['buildJS'], function () {
+
+    return browserify('./public/main.js')
+        .bundle()
+        .pipe(source('main.js'))
+        .pipe(gulp.dest('./public'));
 
 });
 
@@ -143,7 +157,7 @@ gulp.task('build', function () {
     if (process.env.NODE_ENV === 'production') {
         runSeq(['buildJSProduction', 'buildCSSProduction']);
     } else {
-        runSeq(['buildJS', 'buildCSS']);
+        runSeq(['buildJS', 'browserify', 'buildCSS']);
     }
 });
 
@@ -153,7 +167,7 @@ gulp.task('default', function () {
     gulp.start('build');
 
     gulp.watch('browser/js/**', function () {
-        runSeq('buildJS', 'reload');
+        runSeq('buildJS', 'browserify', 'reload');
     });
 
     gulp.watch('browser/scss/**', function () {
