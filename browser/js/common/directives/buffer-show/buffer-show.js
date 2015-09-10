@@ -1,9 +1,6 @@
-var pt = require('periodic-table');
-
 app.directive('bufferShow', function (Buffer) {
   
   function link(scope, element, attrs) {
-    console.log(pt.all());
 
 
   }

@@ -17,6 +17,7 @@
       <br ng-if="$index === 0">
       <input id="cpdFormula" type="text" name="cpdFormula" ng-model="compound.formula" class="form-control">
     </div>
+    <button ng-click="compound.getElements()" >get elements</button>
   </div>
   </div>
   <button ng-click="addCompound()" type="button" class="btn btn-small btn-default">Add another Compound</button>

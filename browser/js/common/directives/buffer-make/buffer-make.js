@@ -1,4 +1,4 @@
-app.directive('bufferMake', function (Buffer) {
+app.directive('bufferMake', function (Buffer, Compound) {
   
   function link(scope, element, attrs) {
 
@@ -7,19 +7,20 @@ app.directive('bufferMake', function (Buffer) {
       .then(function (buffer) {
         scope.savedBuffer = buffer;
         scope.buffer = new Buffer();
-        scope.buffer.compounds = [{}];
+        scope.buffer.compounds = [new Compound()];
       })
       .catch(function (err) {
         console.log(err);
       });
     };
 
-    scope.buffer.compounds = [{}];
+    scope.buffer.compounds = [new Compound()];
 
     scope.addCompound = function () {
       console.log("ran addCompound");
-      scope.buffer.compounds.push({});
+      scope.buffer.compounds.push(new Compound());
     };
+
   }
 
   return {

@@ -1,78 +1,99 @@
+var pt = require('periodic-table');
+
+
 app.factory('Compound', function () {
 
-  function Buffer(props) {
+  function Compound(props) {
+    this.conc = null;
+    this.formula = null;
     angular.extend(this, props);
   }
 
-  Buffer.strParse = function (str, possibles) {
-    var number = str.match(/\d+/)[0];
-    if (!number) throw new Error("No number given");
-    var unit = str.match(/[a-zA-Z]+/)[0];
-    if (possibles.indexOf(unit) === -1) throw new Error("Could not parse unit");
-    return {value: Number(number), units: unit};
-  };
-
-  Buffer.prototype.getUrl = function () {
-    return Buffer.url + this._id;
-  };
-
-  Buffer.prototype.isNew = function () {
-    return !this._id;
-  };
-
-  Buffer.prototype.fetch = function () {
-    return $http.get(this.getUrl())
-    .then(function (res) {
-      return new Buffer(res.data);
+  Compound.prototype.getElements = function () {
+    this.elements = formulaParser(this.formula);
+    this.elements.forEach(function (element) {
+      element.mW = getMW(element.name);
     });
+    this.mW = this.getMW();
+  }
+
+  Compound.prototype.getMW = function () {
+    return this.elements.reduce(function (mem, el) {
+      return mem + (el.mW * el.number);
+    }, 0);
   };
 
-  Buffer.fetchAll = function () {
-    return $http.get(Buffer.url)
-    .then(function (res) {
-      return res.data.map(function (obj) {
-        return new Buffer(obj);
-      });
-    });
-  };
-
-  Buffer.prototype.save = function () {
-    var verb;
-    var url;
-    if (this.isNew()) {
-      verb = 'post';
-      url = Buffer.url;
-    } else {
-      verb = 'put';
-      url = this.getUrl();
-    }
-
-    this.compounds = this.compounds.filter(function (cpd) {
-      return Object.keys(cpd).length > 0;
-    })
-    .map(function (compoundConcObj) {
-      return {
-        concentration: Buffer.strParse(compoundConcObj.conc, ['M', 'mM', 'uM', 'nM', 'pM']),
-        value: { formula: compoundConcObj.formula }
-      };
-    });
-
-    return $http[verb](url, this)
-    .then(function (res) {
-      console.log(res);
-      return new Buffer(res.data);
-    });
-  };
-
-  Buffer.prototype.destroy = function () {
-    return $http.delete(this.getUrl());
-  };
-
-  return Buffer;
+  return Compound;
 });
 
+function getMW (element) {
+  console.log(pt.symbols[element].atomicMass);
+  var mass = pt.symbols[element].atomicMass;
+  if (typeof mass === 'string')
+    mass = Number(mass.slice(0, -3));
+  else mass = element.atomicMass[0];
+  return Number(mass);
+}
 
 
+function simplify(formula) {
+    var regEx = /(\(([A-Z][a-z]?\d*)+\)\d*|\[([A-Z][a-z]?\d*)+\]\d*|\{([A-Z][a-z]?\d*)+\}\d*)/g;
+    var f = formula.match(regEx);
+
+
+    function firstPart(element) {
+      var number = element.match(/\d+$/g);
+      if(number) number = parseInt(number);
+      else number = 1;
+      var innerMatch = element.match(/[A-Z][a-z]?\d*/g);
+      var str = '';
+      innerMatch.forEach(function(subStr) {
+        var subNumber = subStr.match(/\d+$/g);
+        if(subNumber) subStr = subStr.replace(subNumber, parseInt(subNumber) * number);
+        else {
+            if(number !== 1) subStr += number;
+        }
+        str += subStr;
+      });
+      formula = formula.replace(element, str);
+    }
+    while(f) {
+      f.forEach(firstPart);
+      f = formula.match(regEx);
+    }
+    return formula;
+}
+
+function objectComposer(formula) {
+
+    var elementsObj = {}, newMatches = formula.match(/[A-Z][a-z]?\d*/g),
+    el;
+    newMatches.forEach(function(element) {
+        el = element.match(/[A-Z][a-z]?/g);
+        var number = parseInt((element.match(/\d+/g) || '1')[0]);
+        if(elementsObj[el]) elementsObj[el] += number;
+        else elementsObj[el] = number;
+    });
+
+    return elementsObj;
+}
+
+function formulaParser(formula) {
+  formula = simplify(formula);
+  formula = objectComposer(formula);
+  return Object.keys(formula).map(function (key) {
+    return {name: key, number: formula[key]};
+  });
+}
+
+function compoundMatcher(str) {
+  var formula = formulaParser(str);
+      console.log(formula);
+  return Object.keys(formula).map(function(element) {
+    if(formula[element] === 1) return element;
+    return element + formula[element];
+  });
+}
 
 
 
