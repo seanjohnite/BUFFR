@@ -1,10 +1,8 @@
-app.factory('Buffer', function ($http) {
+app.factory('Compound', function () {
 
   function Buffer(props) {
     angular.extend(this, props);
   }
-
-  Buffer.url = '/api/buffers/';
 
   Buffer.strParse = function (str, possibles) {
     var number = str.match(/\d+/)[0];

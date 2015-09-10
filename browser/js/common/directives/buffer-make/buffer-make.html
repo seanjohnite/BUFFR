@@ -1,7 +1,9 @@
-<form name="bufferForm" ng-submit="bufferForm.$valid && saveBuffer()" ><!-- ng-submit="bufferForm.$valid && buffer.save()" -->
+<form novalidate 
+  name="bufferForm" 
+  ng-submit="bufferForm.$valid && saveBuffer()">
   <div class="form-group">
     <label for="bufferVolume">Volume:</label>
-    <input type="text" id="bufferVolume" name="bufferVolume" ng-model="buffer.volume" class="form-control" >
+    <input type="text" id="bufferVolume" name="bufferVolume" ng-model="buffer.volume" class="form-control" required>
   </div>
   <label>Compounds:</label>
   <div class="form-group form-inline" ng-repeat="compound in buffer.compounds">
@@ -17,7 +19,6 @@
     </div>
   </div>
   </div>
-  <button class="btn btn-success" type="submit">Submit</button>
   <button ng-click="addCompound()" type="button" class="btn btn-small btn-default">Add another Compound</button>
+  <button class="btn btn-success" type="submit">Submit</button>
 </form>
-<pre>{{savedBuffer | json}}</pre>
