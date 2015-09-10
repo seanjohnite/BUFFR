@@ -1,4 +1,4 @@
-<form name="bufferForm" ><!-- ng-submit="bufferForm.$valid && buffer.save()" -->
+<form name="bufferForm" ng-submit="bufferForm.$valid && saveBuffer()" ><!-- ng-submit="bufferForm.$valid && buffer.save()" -->
   <div class="form-group">
     <label for="bufferVolume">Volume:</label>
     <input type="text" id="bufferVolume" name="bufferVolume" ng-model="buffer.volume" class="form-control" >
@@ -6,18 +6,18 @@
   <label>Compounds:</label>
   <div class="form-group form-inline" ng-repeat="compound in buffer.compounds">
     <div class="pull-left">
-      <label for="cpdConc">Concentration:</label>
-      <br>
+      <label ng-if="$index === 0" for="cpdConc">Concentration:</label>
+      <br ng-if="$index === 0">
       <input id="cpdConc" type="text" name="cpdConc" ng-model="compound.conc" class="form-control">
     </div>
     <div class="pull-right">
-      <label for="cpdConc">Formula:</label>
-      <br>
+      <label ng-if="$index === 0" for="cpdConc">Formula:</label>
+      <br ng-if="$index === 0">
       <input id="cpdFormula" type="text" name="cpdFormula" ng-model="compound.formula" class="form-control">
     </div>
   </div>
   </div>
-  <button ng-click="addCompound()" class="btn btn-small btn-default">Add another Compound</button>
   <button class="btn btn-success" type="submit">Submit</button>
+  <button ng-click="addCompound()" type="button" class="btn btn-small btn-default">Add another Compound</button>
 </form>
-<pre>{{buffer | json}}</pre>
+<pre>{{savedBuffer | json}}</pre>

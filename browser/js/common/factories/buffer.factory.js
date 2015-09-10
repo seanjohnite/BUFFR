@@ -2,6 +2,7 @@ app.factory('Buffer', function ($http) {
 
   function Buffer(props) {
     angular.extend(this, props);
+    console.log(this);
   }
 
   Buffer.url = '/api/buffers/';
@@ -49,13 +50,19 @@ app.factory('Buffer', function ($http) {
       url = this.getUrl();
     }
 
-    this.compounds.map(function (compoundConcObj) {
-      compoundConcObj.concentration = Buffer.strParse(compoundConcObj.concentration.name);
-      return compoundConcObj;
+    this.compounds = this.compounds.filter(function (cpd) {
+      return Object.keys(cpd).length > 0;
+    })
+    .map(function (compoundConcObj) {
+      return {
+        concentration: Buffer.strParse(compoundConcObj.conc, ['M', 'mM', 'uM', 'nM', 'pM']),
+        value: { formula: compoundConcObj.formula }
+      };
     });
 
     return $http[verb](url, this)
     .then(function (res) {
+      console.log(res);
       return new Buffer(res.data);
     });
   };
