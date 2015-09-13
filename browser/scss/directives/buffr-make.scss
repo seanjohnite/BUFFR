@@ -2,7 +2,11 @@ form[name="bufferForm"] {
   button {
     margin-top: 10px;
   }
-  div>div>input {
+  div>div>input.formcontrol {
     margin-top: 10px;
+    width: 100%
   }
+  // input.cpdName {
+  //   width: 30px
+  // }
 }

@@ -1,7 +1,7 @@
 app.directive('bufferShow', function (Buffer) {
   
   function link(scope, element, attrs) {
-
+    
 
   }
 

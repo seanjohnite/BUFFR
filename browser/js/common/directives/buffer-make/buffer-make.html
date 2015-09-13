@@ -1,25 +1,94 @@
-<form novalidate 
-  name="bufferForm" 
-  ng-submit="bufferForm.$valid && saveBuffer()">
-  <div class="form-group">
-    <label for="bufferVolume">Volume:</label>
-    <input type="text" id="bufferVolume" name="bufferVolume" ng-model="buffer.volume" class="form-control" required>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Mix up your buffer here!</h3>
   </div>
-  <label>Compounds:</label>
-  <div class="form-group form-inline" ng-repeat="compound in buffer.compounds">
-    <div class="pull-left">
-      <label ng-if="$index === 0" for="cpdConc">Concentration:</label>
-      <br ng-if="$index === 0">
-      <input id="cpdConc" type="text" name="cpdConc" ng-model="compound.conc" class="form-control">
-    </div>
-    <div class="pull-right">
-      <label ng-if="$index === 0" for="cpdConc">Formula:</label>
-      <br ng-if="$index === 0">
-      <input id="cpdFormula" type="text" name="cpdFormula" ng-model="compound.formula" class="form-control">
-    </div>
-    <button ng-click="compound.getElements()" >get elements</button>
+  <div class="panel-body">
+    <form novalidate 
+      name="bufferForm" 
+      ng-submit="bufferForm.$valid && saveBuffer()">
+      <div class="row">
+        <div class="col-md-5 form-group">
+          <label for="bufferName">Name:</label>
+          <input 
+            type="text" 
+            id="bufferName" 
+            name="bufferName" 
+            ng-model="buffer.name" 
+            class="form-control" 
+            ng-change="sourceBuffer(buffer)"
+            ng-model-options="{ debounce: 1000 }"
+            required>
+        </div>
+        <div class="col-md-5 form-group">
+          <label for="bufferVolume">Volume:</label>
+          <input 
+            type="text" 
+            id="bufferVolume" 
+            name="bufferVolume" 
+            ng-model="buffer.volume" 
+            class="form-control" 
+            ng-change="calcBuffer(compound)"
+            ng-model-options="{ debounce: 1000 }"
+            required>
+        </div>
+        <div class="col-md-2 form-group">
+          <label for="bufferStockX">Multiplier</label>
+          <input 
+            type="text" 
+            id="bufferStockX" 
+            name="bufferStockX" 
+            ng-model="buffer.stockX" 
+            class="form-control" 
+            ng-change=""
+            ng-model-options="{ debounce: 1000 }"
+            required>
+        </div>
+      </div>
+      <label>Compounds:</label>
+      <div class="form-group" ng-repeat="compound in buffer.compounds">
+
+        <div class="row">
+          <div class="col-md-2">
+            <label ng-if="$index === 0" for="cpdConc">Name:</label>
+            <br ng-if="$index === 0">
+            <input 
+              class="form-control cpdName" 
+              type="text" 
+              name="cpdConc" 
+              ng-model="compound.name" 
+              ng-change="sourceCompound(compound)"
+              ng-model-options="{ debounce: 1000 }">
+          </div>
+          <div class="col-md-5">
+            <label ng-if="$index === 0" for="cpdConc">Concentration:</label>
+            <br ng-if="$index === 0">
+            <input 
+              id="cpdConc" 
+              type="text" 
+              name="cpdConc" 
+              ng-model="compound.conc" 
+              ng-change="calcBuffer(compound)"
+              ng-model-options="{ debounce: 1000 }"
+              class="form-control">
+          </div>
+          <div class="col-md-5">
+            <label ng-if="$index === 0" for="cpdConc">Formula:</label>
+            <br ng-if="$index === 0">
+            <input 
+              ng-change="calcBuffer(compound)"
+              id="cpdFormula" 
+              type="text" 
+              name="cpdFormula" 
+              ng-model="compound.formula" 
+              ng-model-options="{ debounce: 1000 }"
+              class="form-control">
+          </div>
+        </div>
+      </div>
+      <button ng-click="addCompound()" type="button" class="btn btn-small btn-info">Add another Compound</button>
+      <button ng-click="removeCompound()" type="button" class="btn btn-small btn-danger">Remove Compound</button>
+
+      <button class="btn btn-success" type="submit">Save</button>
+    </form>
   </div>
-  </div>
-  <button ng-click="addCompound()" type="button" class="btn btn-small btn-default">Add another Compound</button>
-  <button class="btn btn-success" type="submit">Submit</button>
-</form>
+</div>

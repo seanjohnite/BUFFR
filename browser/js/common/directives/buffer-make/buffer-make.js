@@ -1,4 +1,4 @@
-app.directive('bufferMake', function (Buffer, Compound) {
+app.directive('bufferMake', function (Buffer, Compound, premadeBuffers) {
   
   function link(scope, element, attrs) {
 
@@ -17,9 +17,38 @@ app.directive('bufferMake', function (Buffer, Compound) {
     scope.buffer.compounds = [new Compound()];
 
     scope.addCompound = function () {
-      console.log("ran addCompound");
       scope.buffer.compounds.push(new Compound());
     };
+
+    scope.calcBuffer = function (compound) {
+      if (compound){
+        if (!/[a-zA-Z]+/.test(compound.conc)) return;
+        compound.getElements();
+      }
+      scope.buffer.fillAmounts();
+    };
+
+    scope.removeCompound = function () {
+      if (scope.buffer.compounds.length === 1) {
+        scope.buffer.compounds = [new Compound()];
+        return;
+      }
+      scope.buffer.compounds.pop();
+    };
+
+    scope.sourceCompound = function (compound) {
+      compound.fillFormula();
+    }
+
+    scope.sourceBuffer = function (compound) {
+      var premade = premadeBuffers(scope.buffer.name);
+      if (premade) {
+        scope.buffer = new Buffer(angular.copy(premade));
+        scope.buffer.compounds = scope.buffer.compounds.map(function (compound) {
+          return new Compound(compound);
+        });
+      }
+    }
 
   }
 

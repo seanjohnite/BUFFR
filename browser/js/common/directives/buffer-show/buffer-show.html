@@ -1,0 +1,14 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">Your buffer</h3>
+  </div>
+  <div class="panel-body">
+    Your {{buffer.volume}} {{buffer.name}} buffer has these compounds with these amounts:
+      <ul>
+        <li ng-repeat="compound in buffer.compounds">
+          {{compound.prettifyAmount()}} of {{compound.name || compound.formula}}
+        </li>
+      </ul>
+      <pre>{{buffer | json}}</pre>
+  </div>
+</div>
